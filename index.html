@@ -201,6 +201,25 @@
     font-weight: 600;
     margin: 28px 0 12px;
   }
+  .date-group { margin-bottom: 16px; }
+  .date-group:last-child { margin-bottom: 0; }
+  .date-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .date-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
   .match-tabs {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -538,8 +557,8 @@
     <p class="hero-sub">挑出近 48 小時內的關鍵對戰，整合國際盤口、官方傷兵清單、近 5 戰表現，歸納幾種可考慮的下注角度與背後邏輯，幫你建立自己的判斷，而不是替你下注。</p>
   </section>
 
-  <div class="section-label">本日 / 明日比賽</div>
-  <div class="match-tabs" id="tabs"></div>
+  <div class="section-label">近 3 日小組賽 · 點選查看詳細</div>
+  <div id="tabs"></div>
 
   <section class="match-detail" id="detail"></section>
 
@@ -562,6 +581,94 @@
 
 <script>
 const matches = [
+  {
+    id: 'es-cv',
+    teams: '西班牙 vs 維德角',
+    t1: '西班牙', t2: '維德角',
+    home: '西班牙', away: '維德角',
+    time: '6/16 00:00 週一',
+    date: '6/16',
+    venue: 'Mercedes-Benz 球場（亞特蘭大）',
+    stage: 'H 組 · 第 1 輪',
+    ml: { h: 1.09, d: 11.58, a: 24.00 },
+    spark: { h: [1.12,1.11,1.10,1.09,1.10,1.09], a: [22.00,23.00,24.00,24.50,24.00,24.00] },
+    hc: { line: '-2.5', h: 1.65, a: 2.15 },
+    ou: { line: 3.5, o: 1.65, u: 2.20 },
+    formH: ['W','W','W','W','W'], formA: ['W','W','L','W','D'],
+    injH: [{n:'Lamine Yamal（邊鋒）', s:'出賽存疑'}],
+    injA: [{n:'陣容完整', s:'無重大傷情'}],
+    angles: [
+      {t:'讓分 -2.5 西班牙', m:'@ 1.65', c:'high', w:'多模型預測 5-0；西班牙 30+ 場未敗，控球與射門數據壓倒性'},
+      {t:'大小 3.5 - 大', m:'@ 1.65', c:'high', w:'西班牙場均 9.7 SOT，維德角防線難擋長時間轟炸'},
+      {t:'不讓分 - 西班牙勝', m:'@ 1.09', c:'low', w:'賠率太低，押 100 元只贏 9 元'},
+    ],
+  },
+  {
+    id: 'be-eg',
+    teams: '比利時 vs 埃及',
+    t1: '比利時', t2: '埃及',
+    home: '比利時', away: '埃及',
+    time: '6/16 03:00 週一',
+    date: '6/16',
+    venue: 'Lumen Field（西雅圖）',
+    stage: 'G 組 · 第 1 輪',
+    ml: { h: 1.54, d: 4.00, a: 6.00 },
+    spark: { h: [1.60,1.58,1.55,1.54,1.55,1.54], a: [6.50,6.20,6.00,5.90,6.00,6.00] },
+    hc: { line: '-1.0', h: 1.75, a: 2.05 },
+    ou: { line: 2.5, o: 1.80, u: 2.00 },
+    formH: ['W','W','W','W','D'], formA: ['W','W','D','W','W'],
+    injH: [{n:'陣容完整', s:'無重大傷情'}],
+    injA: [{n:'陣容完整', s:'無重大傷情'}],
+    angles: [
+      {t:'兩隊都進球 - 是', m:'@ 2.10', c:'high', w:'De Bruyne vs Salah 雙巨星，雙方都有破門能力與防守漏洞'},
+      {t:'不讓分 - 比利時勝', m:'@ 1.54', c:'med', w:'熱身賽 5-0 突尼西亞 + 2-0 克羅埃西亞，黃金世代深度仍強'},
+      {t:'大小 2.5 - 大', m:'@ 1.80', c:'med', w:'比利時近期火力強，埃及防守可被攻破'},
+    ],
+  },
+  {
+    id: 'sa-uy',
+    teams: '沙烏地阿拉伯 vs 烏拉圭',
+    t1: '沙烏地', t2: '烏拉圭',
+    home: '沙烏地', away: '烏拉圭',
+    time: '6/16 06:00 週一',
+    date: '6/16',
+    venue: 'Hard Rock 球場（邁阿密）',
+    stage: 'H 組 · 第 1 輪',
+    ml: { h: 12.00, d: 5.00, a: 1.47 },
+    spark: { h: [11.00,11.50,12.00,12.50,12.00,12.00], a: [1.50,1.48,1.47,1.46,1.47,1.47] },
+    hc: { line: '客隊 -1.0', h: 2.05, a: 1.80 },
+    ou: { line: 2.5, o: 2.10, u: 1.75 },
+    formH: ['L','D','L','L','W'], formA: ['W','D','D','W','W'],
+    injH: [{n:'Al-Aqidi（副門將）', s:'出賽存疑'}],
+    injA: [{n:'de Arrascaeta（中場）', s:'傷退缺陣'},{n:'Darwin Núñez（前鋒）', s:'狀態低迷'}],
+    angles: [
+      {t:'大小 2.5 - 小', m:'@ 1.75', c:'high', w:'Bielsa 防守風格 + 烏拉圭創造者缺陣；近 7 戰僅 2 場破 2.5'},
+      {t:'兩隊都進球 - 否', m:'@ 1.65', c:'med', w:'沙烏地進攻乏力；烏拉圭近 9 場 6 場零失球'},
+      {t:'不讓分 - 烏拉圭勝', m:'@ 1.47', c:'med', w:'實力差距大但沙烏地會死守 0-0，賠率不算便宜'},
+    ],
+  },
+  {
+    id: 'ir-nz',
+    teams: '伊朗 vs 紐西蘭',
+    t1: '伊朗', t2: '紐西蘭',
+    home: '伊朗', away: '紐西蘭',
+    time: '6/16 09:00 週一',
+    date: '6/16',
+    venue: 'SoFi 球場（洛杉磯）',
+    stage: 'G 組 · 第 1 輪',
+    ml: { h: 1.83, d: 3.40, a: 4.75 },
+    spark: { h: [1.90,1.86,1.85,1.83,1.84,1.83], a: [4.50,4.60,4.70,4.75,4.80,4.75] },
+    hc: { line: '-0.5', h: 1.85, a: 1.95 },
+    ou: { line: 2.5, o: 2.50, u: 1.57 },
+    formH: ['W','W','W','D','W'], formA: ['L','L','L','W','L'],
+    injH: [{n:'Jahanbakhsh / Torabi / Cheshmi', s:'多人狀況存疑'}],
+    injA: [{n:'陣容完整', s:'無重大傷情'}],
+    angles: [
+      {t:'大小 2.5 - 小', m:'@ 1.57', c:'high', w:'伊朗近 8 場 6 場零封；紐西蘭近 6 戰 5 敗，進攻乏力'},
+      {t:'不讓分 - 伊朗勝', m:'@ 1.83', c:'med', w:'Taremi 領銜經驗深，但開幕戰常保守'},
+      {t:'讓分 -0.5 伊朗', m:'@ 1.85', c:'low', w:'本質與獨贏同邏輯，賠率僅小幅提升'},
+    ],
+  },
   {
     id: 'fr-sn',
     teams: '法國 vs 塞內加爾',
@@ -648,7 +755,7 @@ const matches = [
   },
 ];
 
-let active = 'ar-dz';
+let active = 'es-cv';
 
 function makeSparkline(values, w, h) {
   const min = Math.min(...values), max = Math.max(...values), range = max - min || 0.01;
@@ -666,12 +773,29 @@ function makeSparkline(values, w, h) {
 }
 
 function renderTabs() {
-  document.getElementById('tabs').innerHTML = matches.map(m => `
-    <button class="match-tab ${m.id === active ? 'active' : ''}" data-id="${m.id}">
-      <div class="tab-time">${m.time}</div>
-      <div class="tab-teams">${m.t1} vs ${m.t2}</div>
-    </button>
-  `).join('');
+  const groups = {};
+  matches.forEach(m => {
+    if (!groups[m.date]) groups[m.date] = [];
+    groups[m.date].push(m);
+  });
+  const html = Object.keys(groups).map(date => {
+    const tabsHtml = groups[date].map(m => {
+      const timeOnly = m.time.replace(date + ' ', '');
+      return `
+        <button class="match-tab ${m.id === active ? 'active' : ''}" data-id="${m.id}">
+          <div class="tab-time">${timeOnly}</div>
+          <div class="tab-teams">${m.t1} vs ${m.t2}</div>
+        </button>
+      `;
+    }).join('');
+    return `
+      <div class="date-group">
+        <div class="date-header">${date}</div>
+        <div class="match-tabs">${tabsHtml}</div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('tabs').innerHTML = html;
   document.querySelectorAll('.match-tab').forEach(b => {
     b.addEventListener('click', () => { active = b.dataset.id; render(); });
   });
