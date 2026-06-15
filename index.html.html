@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>運彩雷達 · 2026 世界盃</title>
+<meta name="description" content="整合即時賠率、傷兵與球隊近況，歸納可考慮的下注角度。資訊參考非投注建議。">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+
+<style>
+  :root {
+    --bg: #F7F8F9;
+    --surface: #FFFFFF;
+    --surface-soft: #F1F3F5;
+    --border: #E4E7EB;
+    --border-strong: #CCD1D7;
+    --text: #16181B;
+    --text-soft: #5B6166;
+    --text-faint: #8A9097;
+    --accent: #0F766E;
+    --accent-soft: #CCFBF1;
+    --accent-soft-text: #134E4A;
+    --warn-bg: #FEF3C7;
+    --warn-text: #78350F;
+    --danger-text: #991B1B;
+    --w-bg: #D1FAE5;
+    --w-text: #065F46;
+    --d-bg: #E5E7EB;
+    --d-text: #374151;
+    --l-bg: #FEE2E2;
+    --l-text: #991B1B;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  [data-theme="dark"] {
+    --bg: #0E1013;
+    --surface: #181B1F;
+    --surface-soft: #22262B;
+    --border: #2A2F35;
+    --border-strong: #3A4047;
+    --text: #ECECEC;
+    --text-soft: #A0A6AC;
+    --text-faint: #6E747B;
+    --accent: #2DD4BF;
+    --accent-soft: #134E4A;
+    --accent-soft-text: #99F6E4;
+    --warn-bg: #422006;
+    --warn-text: #FCD34D;
+    --danger-text: #FCA5A5;
+    --w-bg: #064E3B;
+    --w-text: #6EE7B7;
+    --d-bg: #2A2F35;
+    --d-text: #A0A6AC;
+    --l-bg: #4C1D1D;
+    --l-text: #FCA5A5;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+  }
+  [data-theme="dark"] .brand-mark { color: #0E1013; }
+  .brand-name {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: -2px;
+    letter-spacing: 0.02em;
+  }
+  .nav-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-soft);
+    padding: 6px 10px;
+    background: var(--surface-soft);
+    border-radius: 100px;
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: #DC2626;
+    border-radius: 50%;
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    background: transparent;
+    border-radius: 8px;
+    color: var(--text-soft);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover {
+    background: var(--surface-soft);
+    color: var(--text);
+  }
+
+  /* Hero */
+  .hero {
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .hero-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    line-height: 1.25;
+  }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--text-soft);
+    max-width: 580px;
+    margin: 0;
+  }
+
+  /* Match tabs */
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin: 28px 0 12px;
+  }
+  .match-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .match-tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .match-tab:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+  .match-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  [data-theme="dark"] .match-tab.active { color: #0E1013; }
+  .match-tab.active .tab-time { color: rgba(255,255,255,0.75); }
+  [data-theme="dark"] .match-tab.active .tab-time { color: rgba(14,16,19,0.65); }
+  .tab-time {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+  .tab-teams {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* Match detail */
+  .match-detail { padding: 24px 0 16px; }
+
+  .match-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .match-teams {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .match-teams .vs {
+    color: var(--text-faint);
+    font-weight: 400;
+    font-size: 16px;
+    margin: 0 8px;
+  }
+  .match-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .match-meta-item { display: flex; align-items: center; gap: 6px; }
+  .match-meta-item i { font-size: 15px; color: var(--text-faint); }
+
+  /* Panel cards */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+  .panel-title i { font-size: 16px; color: var(--accent); }
+
+  /* Odds */
+  .odds-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .odds-cell {
+    background: var(--surface-soft);
+    padding: 14px 12px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+  }
+  .odds-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .odds-label {
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+  .spark {
+    width: 100%;
+    height: 18px;
+    margin-top: 6px;
+  }
+  .odds-sub-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .odds-sub-block .market-label {
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+  .odds-sub-block .odds-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  /* Form + Injuries */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .team-form-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+  .team-form-row:not(:last-child) {
+    border-bottom: 1px dashed var(--border);
+  }
+  .team-name {
+    font-size: 13px;
+    color: var(--text-soft);
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .form-dots { display: flex; gap: 4px; }
+  .form-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .form-W { background: var(--w-bg); color: var(--w-text); }
+  .form-D { background: var(--d-bg); color: var(--d-text); }
+  .form-L { background: var(--l-bg); color: var(--l-text); }
+
+  .injury-list { margin-top: 4px; }
+  .injury-block:not(:last-child) { margin-bottom: 14px; }
+  .injury-team-label {
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .injury-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .injury-row:last-child { border-bottom: none; }
+  .injury-status { color: var(--text-faint); }
+
+  /* Betting angles */
+  .angle {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: default;
+    transition: all 0.15s;
+  }
+  .angle:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-soft);
+  }
+  .angle:last-child { margin-bottom: 0; }
+  .angle-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .angle-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .angle-odds {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-left: 8px;
+  }
+  .angle-why {
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
+  .badge {
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-high { background: var(--accent-soft); color: var(--accent-soft-text); }
+  .badge-med  { background: var(--warn-bg); color: var(--warn-text); }
+  .badge-low  { background: var(--d-bg); color: var(--d-text); }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+    padding: 32px 0 24px;
+    background: var(--surface);
+  }
+  .resp-gambling {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--warn-bg);
+    color: var(--warn-text);
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .resp-gambling i { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .footer-meta {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+  .footer-meta a {
+    color: var(--text-soft);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--text-faint);
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .hero-title { font-size: 22px; }
+    .match-tabs { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .odds-grid { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .odds-value { font-size: 18px; }
+    .panel { padding: 16px 18px; }
+    .match-header { padding: 18px; }
+    .match-teams { font-size: 18px; }
+    .odds-sub-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <div class="brand-mark"><i class="ti ti-radar-2"></i></div>
+        <div>
+          <div class="brand-name">運彩雷達</div>
+          <div class="brand-sub">SPORTS LOTTERY RADAR · WC 2026</div>
+        </div>
+      </div>
+      <div class="nav-tools">
+        <div class="live-indicator">
+          <span class="live-dot"></span>
+          <span>賠率更新於 <span id="updatedAt" class="num">23:45</span></span>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="切換暗色模式">
+          <i class="ti ti-sun" id="themeIcon"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="hero">
+    <div class="hero-eyebrow">資訊整合 · 非投注建議</div>
+    <h1 class="hero-title">把賠率、傷兵、近況收進同一張桌子</h1>
+    <p class="hero-sub">挑出近 48 小時內的關鍵對戰，整合國際盤口、官方傷兵清單、近 5 戰表現，歸納幾種可考慮的下注角度與背後邏輯，幫你建立自己的判斷，而不是替你下注。</p>
+  </section>
+
+  <div class="section-label">本日 / 明日比賽</div>
+  <div class="match-tabs" id="tabs"></div>
+
+  <section class="match-detail" id="detail"></section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="resp-gambling">
+      <i class="ti ti-alert-triangle"></i>
+      <div>
+        <strong>負期望值提醒</strong>：所有運彩玩法的長期期望值對玩家為負，莊家透過抽水獲利，沒有任何分析能系統性打敗效率盤口。請以娛樂心態量力而為，並設定每月可承擔的損失上限。如感覺對博彩失控，請撥打 1995 或 0800-095-995（生命線）。
+      </div>
+    </div>
+    <div class="footer-meta">
+      資料來源：bet365、Pinnacle、Kalshi 預測市場、Dimers 模型、ESPN、Sofascore<br>
+      實際投注賠率以 <a href="https://www.sportslottery.com.tw" target="_blank">台灣運彩官方</a> 為準 · 介面設計範例
+    </div>
+  </div>
+</footer>
+
+<script>
+const matches = [
+  {
+    id: 'fr-sn',
+    teams: '法國 vs 塞內加爾',
+    t1: '法國', t2: '塞內加爾',
+    home: '法國', away: '塞內加爾',
+    time: '6/17 03:00 週三',
+    venue: 'MetLife 球場',
+    stage: 'I 組 · 第 1 輪',
+    ml: { h: 1.45, d: 4.50, a: 6.50 },
+    spark: { h: [1.50,1.48,1.47,1.45,1.46,1.45], a: [6.20,6.30,6.40,6.50,6.50,6.50] },
+    hc: { line: '-1.0', h: 1.85, a: 1.95 },
+    ou: { line: 2.5, o: 1.90, u: 1.90 },
+    formH: ['W','L','W','W','D'], formA: ['L','D','W','D','W'],
+    injH: [{n:'Saliba（中後衛）', s:'背傷觀察'},{n:'Maignan（門將）', s:'小傷可上'}],
+    injA: [{n:'Koulibaly（中後衛）', s:'體能疑慮'},{n:'I. Sarr（邊鋒）', s:'輕傷'}],
+    angles: [
+      {t:'兩隊都進球 - 是', m:'@ 1.95', c:'high', w:'法國近 7 戰有 6 戰雙方進球；塞內加爾反擊速度足以破門'},
+      {t:'不讓分 - 法國勝', m:'@ 1.45', c:'med', w:'盤口隱含 66% 勝率，與多家模型一致，但賠率偏低'},
+      {t:'讓分 -1.0 法國', m:'@ 1.85', c:'low', w:'法國防線狀態起伏，1 球差距風險偏高'},
+    ],
+  },
+  {
+    id: 'ar-dz',
+    teams: '阿根廷 vs 阿爾及利亞',
+    t1: '阿根廷', t2: '阿爾及利亞',
+    home: '阿根廷', away: '阿爾及利亞',
+    time: '6/17 09:00 週三',
+    venue: 'Arrowhead 球場',
+    stage: 'J 組 · 第 1 輪',
+    ml: { h: 1.43, d: 4.50, a: 9.00 },
+    spark: { h: [1.40,1.42,1.43,1.44,1.43,1.43], a: [9.50,9.20,9.00,9.00,9.10,9.00] },
+    hc: { line: '-1.5', h: 1.95, a: 1.85 },
+    ou: { line: 2.5, o: 1.91, u: 1.91 },
+    formH: ['W','W','W','D','W'], formA: ['L','D','D','W','W'],
+    injH: [{n:'Tagliafico（左後衛）', s:'小腿傷缺陣'}],
+    injA: [{n:'Bensebaini（左後衛）', s:'腳踝傷'},{n:'Gouiri（前鋒）', s:'肩傷恢復'}],
+    angles: [
+      {t:'讓分 -1.5 阿根廷', m:'@ 1.95', c:'high', w:'多模型預測 2-0；阿爾左路雙傷，難擋阿軍邊路推進'},
+      {t:'不讓分 - 阿根廷勝', m:'@ 1.43', c:'med', w:'Messi 確認健康先發，衛冕冠軍開門安全選擇'},
+      {t:'大小 2.5 - 大', m:'@ 1.91', c:'low', w:'阿爾會擺巴士死守，進球數有壓抑可能'},
+    ],
+  },
+  {
+    id: 'pt-cd',
+    teams: '葡萄牙 vs 剛果民主共和國',
+    t1: '葡萄牙', t2: '剛果',
+    home: '葡萄牙', away: '剛果',
+    time: '6/18 01:00 週四',
+    venue: 'NRG 球場（休士頓）',
+    stage: 'K 組 · 第 1 輪',
+    ml: { h: 1.25, d: 6.00, a: 9.50 },
+    spark: { h: [1.30,1.28,1.27,1.25,1.26,1.25], a: [9.00,9.30,9.50,9.40,9.50,9.50] },
+    hc: { line: '-1.5', h: 1.70, a: 2.10 },
+    ou: { line: 2.5, o: 1.65, u: 2.20 },
+    formH: ['W','W','W','W','D'], formA: ['W','W','D','W','W'],
+    injH: [{n:'陣容完整', s:'無重大傷情'}],
+    injA: [{n:'陣容完整', s:'無重大傷情'}],
+    angles: [
+      {t:'讓分 -1.5 葡萄牙', m:'@ 1.70', c:'high', w:'預選賽 6 場 20 球；實力差距明顯，獨贏 1.25 太低'},
+      {t:'大小 2.5 - 大', m:'@ 1.65', c:'med', w:'C 羅 + Bruno + Leao 火力強，休士頓高溫利進攻'},
+      {t:'不讓分 - 葡萄牙勝', m:'@ 1.25', c:'low', w:'賠率太低，押 100 元只贏 25 元，性價比差'},
+    ],
+  },
+  {
+    id: 'en-hr',
+    teams: '英格蘭 vs 克羅埃西亞',
+    t1: '英格蘭', t2: '克羅埃西亞',
+    home: '英格蘭', away: '克羅埃西亞',
+    time: '6/18 04:00 週四',
+    venue: 'AT&T 球場（達拉斯）',
+    stage: 'L 組 · 第 1 輪',
+    ml: { h: 1.75, d: 3.70, a: 4.75 },
+    spark: { h: [1.80,1.78,1.77,1.75,1.76,1.75], a: [4.50,4.60,4.70,4.75,4.80,4.75] },
+    hc: { line: '-0.5', h: 1.75, a: 2.10 },
+    ou: { line: 2.5, o: 2.20, u: 1.65 },
+    formH: ['W','W','W','W','W'], formA: ['D','W','L','W','D'],
+    injH: [{n:'陣容完整', s:'Kane / Bellingham 健康'}],
+    injA: [{n:'Modric（中場）', s:'38 歲體能受限'}],
+    angles: [
+      {t:'不讓分 - 英格蘭勝', m:'@ 1.75', c:'high', w:'歐預賽 8 戰全勝 0 失球；克隊老化，當日最佳賠率'},
+      {t:'大小 2.5 - 小', m:'@ 1.65', c:'med', w:'克隊預期死守 + 英格蘭控球節奏慢，易低比分'},
+      {t:'雙勝 - 英格蘭或和', m:'@ 1.25', c:'med', w:'最保守選項，含蓋率約 92%'},
+    ],
+  },
+];
+
+let active = 'ar-dz';
+
+function makeSparkline(values, w, h) {
+  const min = Math.min(...values), max = Math.max(...values), range = max - min || 0.01;
+  const stepX = w / (values.length - 1);
+  const pts = values.map((v, i) => {
+    const x = i * stepX;
+    const y = h - ((v - min) / range) * (h - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const trend = values[values.length-1] - values[0];
+  const color = trend < 0 ? '#DC2626' : trend > 0 ? '#15803D' : '#8A9097';
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  </svg>`;
+}
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = matches.map(m => `
+    <button class="match-tab ${m.id === active ? 'active' : ''}" data-id="${m.id}">
+      <div class="tab-time">${m.time}</div>
+      <div class="tab-teams">${m.t1} vs ${m.t2}</div>
+    </button>
+  `).join('');
+  document.querySelectorAll('.match-tab').forEach(b => {
+    b.addEventListener('click', () => { active = b.dataset.id; render(); });
+  });
+}
+
+function renderForm(arr) {
+  return arr.map(r => `<div class="form-dot form-${r}">${r}</div>`).join('');
+}
+
+function badgeMarkup(c) {
+  if (c === 'high') return '<span class="badge badge-high">高信心</span>';
+  if (c === 'med') return '<span class="badge badge-med">中等</span>';
+  return '<span class="badge badge-low">低 / 留意風險</span>';
+}
+
+function render() {
+  renderTabs();
+  const m = matches.find(x => x.id === active);
+  document.getElementById('detail').innerHTML = `
+    <div class="match-header">
+      <div>
+        <h2 class="match-teams">${m.t1}<span class="vs">vs</span>${m.t2}</h2>
+        <div class="match-meta">
+          <div class="match-meta-item"><i class="ti ti-clock"></i><span class="num">${m.time}</span></div>
+          <div class="match-meta-item"><i class="ti ti-map-pin"></i>${m.venue}</div>
+          <div class="match-meta-item"><i class="ti ti-trophy"></i>${m.stage}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title"><i class="ti ti-chart-line"></i>即時賠率與走勢</h3>
+        <span style="font-size: 11px; color: var(--text-faint);">decimal / 國際盤參考</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:8px;letter-spacing:0.02em;">不讓分 · 含 24 小時賠率走勢</div>
+      <div class="odds-grid">
+        <div class="odds-cell">
+          <div class="odds-value num">${m.ml.h.toFixed(2)}</div>
+          <div class="odds-label">${m.home}勝</div>
+          ${makeSparkline(m.spark.h, 80, 18)}
+        </div>
+        <div class="odds-cell">
+          <div class="odds-value num">${m.ml.d.toFixed(2)}</div>
+          <div class="odds-label">和局</div>
+        </div>
+        <div class="odds-cell">
+          <div class="odds-value num">${m.ml.a.toFixed(2)}</div>
+          <div class="odds-label">${m.away}勝</div>
+          ${makeSparkline(m.spark.a, 80, 18)}
+        </div>
+      </div>
+      <div class="odds-sub-grid">
+        <div class="odds-sub-block">
+          <div class="market-label">讓分（主隊 ${m.hc.line}）</div>
+          <div class="odds-pair">
+            <div class="odds-cell"><div class="odds-value num">${m.hc.h.toFixed(2)}</div><div class="odds-label">主</div></div>
+            <div class="odds-cell"><div class="odds-value num">${m.hc.a.toFixed(2)}</div><div class="odds-label">客</div></div>
+          </div>
+        </div>
+        <div class="odds-sub-block">
+          <div class="market-label">大小（${m.ou.line} 球）</div>
+          <div class="odds-pair">
+            <div class="odds-cell"><div class="odds-value num">${m.ou.o.toFixed(2)}</div><div class="odds-label">大</div></div>
+            <div class="odds-cell"><div class="odds-value num">${m.ou.u.toFixed(2)}</div><div class="odds-label">小</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <h3 class="panel-title"><i class="ti ti-activity"></i>近 5 戰表現</h3>
+        </div>
+        <div class="team-form-row">
+          <div class="team-name">${m.home}</div>
+          <div class="form-dots">${renderForm(m.formH)}</div>
+        </div>
+        <div class="team-form-row">
+          <div class="team-name">${m.away}</div>
+          <div class="form-dots">${renderForm(m.formA)}</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3 class="panel-title"><i class="ti ti-bandage"></i>傷兵 / 狀態</h3>
+        </div>
+        <div class="injury-block">
+          <div class="injury-team-label">${m.home}</div>
+          ${m.injH.map(i => `<div class="injury-row"><span>${i.n}</span><span class="injury-status">${i.s}</span></div>`).join('')}
+        </div>
+        <div class="injury-block">
+          <div class="injury-team-label">${m.away}</div>
+          ${m.injA.map(i => `<div class="injury-row"><span>${i.n}</span><span class="injury-status">${i.s}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title"><i class="ti ti-bulb"></i>歸納下注角度</h3>
+        <span style="font-size:11px;color:var(--text-faint);">依信心由高到低</span>
+      </div>
+      ${m.angles.map(a => `
+        <div class="angle">
+          <div class="angle-head">
+            <div>
+              <span class="angle-title">${a.t}</span>
+              <span class="angle-odds num">${a.m}</span>
+            </div>
+            ${badgeMarkup(a.c)}
+          </div>
+          <div class="angle-why">${a.w}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeIcon.className = theme === 'dark' ? 'ti ti-moon' : 'ti ti-sun';
+  localStorage.setItem('theme', theme);
+}
+const saved = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+applyTheme(saved);
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// Update timestamp every minute
+function updateTime() {
+  const now = new Date();
+  document.getElementById('updatedAt').textContent =
+    String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+}
+updateTime();
+setInterval(updateTime, 60000);
+
+render();
+</script>
+
+</body>
+</html>
